@@ -1,5 +1,6 @@
 <b>The app is deployed on Streamlit Cloud. Test it yourself:
 https://vargamarton.streamlit.app/</b>
+
 WORK IN PROGRESS
 
 This is an interactive Streamlit Dashboard for portfolio optimization and risk analysis using Modern Portfolio Theory.
