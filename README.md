@@ -38,4 +38,10 @@ Technical limitations: this app was made for educational purposes
 <hr>
 <img width="713" height="383" alt="rollingsharpe" src="https://github.com/user-attachments/assets/e14a3998-1c61-4ff4-ad60-804975d3deb1" />
 <hr>
+<img width="708" height="280" alt="riskcon" src="https://github.com/user-attachments/assets/9be3f358-ef74-4df5-8e7c-9fb2ec0a74d9" />
+<hr>
+<img width="701" height="348" alt="weight" src="https://github.com/user-attachments/assets/3d4cf858-1798-40e6-8271-1320ee1c3932" />
+<hr>
+
+
 Varga Márton
