@@ -365,7 +365,7 @@ if st.session_state.results is not None:
     #NORMAL
         fig_corr_normal = px.imshow(corr_normal, text_auto=True, color_continuous_scale='RdBu_r', zmin=-1, zmax=1, aspect="auto")
         st.plotly_chart(fig_corr_normal, width="stretch")
-        st.info("Below, the graph shows correlation under stress. (Only days with bottom 10% returns count")
+        st.info("Below, the graph shows correlation under stress. (Only days with bottom 10% returns count)")
     #STRESS
         fig_corr_stress = px.imshow(corr_stress, text_auto=True, color_continuous_scale='RdBu_r', zmin=-1, zmax=1, aspect="auto")
         st.plotly_chart(fig_corr_stress, width="stretch")
