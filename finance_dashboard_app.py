@@ -18,7 +18,7 @@ STATIC_TICKERS = [
     'JPM', 'UNH', 'JNJ', 'XOM', 'AVGO', 'HD', 'PG', 'COST', 'ADBE', 'LLY', 
     'CVX', 'MRK', 'ABBV', 'KO', 'PEP', 'BAC', 'WMT', 'TMO', 'CRM', 'MCD', 
     'ACN', 'CSCO', 'NFLX', 'ORCL', 'ABT', 'DIS', 'DHR', 'INTC', 'VZ', 'TXN', 
-    'AMAT', 'PM', 'PFE', 'LOW', 'UNP', 'SPY', 'QQQ', 'VOO', 'IWM', 'DIA', 'GLD', 'CAT'
+    'AMAT', 'PM', 'PFE', 'LOW', 'UNP', 'SPY', 'QQQ', 'VOO', 'IWM', 'DIA', 'GLD', 'CAT','GE'
 ]
 
 @st.cache_data
