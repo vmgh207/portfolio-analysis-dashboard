@@ -65,7 +65,7 @@ def run_monte_carlo(mean_returns, cov_matrix, num_simulations, risk_free_rate):
     weights = np.random.random((num_simulations, num_assets))  # creates a matrix filled with numbers [0;1] =weights
     weights = weights / np.sum(weights, axis=1)[:, np.newaxis] # now the sum of weights in each row will be 1
                                                                 # np.newaxis broadcasts sums (a list) into a (m,1) matrix
-    port_returns = np.dot(weights, mean_returns) # E(R_p) = w_1*r_1+w_2*r_2+...+w_n*r_n    =weighted mean portfolio return
+    port_returns = np.dot(weights, mean_returns) # E(R_p) = w_1*r_1+w_2*r_2+...+w_n*r_n   =weighted mean portfolio return
     port_vols = np.sqrt(np.einsum('ij,jk,ik->i', weights, cov_matrix, weights))
     # i: simulation index, j/k: asset index. calculates portfolio volatility for all simulations. portfolio volatility = square root of (transposed weights * covariance * weights). though, np.einsum automatically transposes
     sharpe_ratios = (port_returns - risk_free_rate) / port_vols
