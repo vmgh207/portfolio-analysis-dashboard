@@ -1,0 +1,119 @@
+let
+    fn = (beerkezett as datetime, kategoria as text, tipus as text, 
+          szabalyok as table, holidays as list) as datetime =>
+    let
+        // ── Segédfüggvények ───────────────────────────────────────────
+        IsWorkday = (d as date) as logical =>
+            Date.DayOfWeek(d, Day.Monday) < 5 and 
+            not List.Contains(holidays, d),
+
+        NextWorkday = (d as date) as date =>
+            let
+                candidates = List.Generate(
+                    () => Date.AddDays(d, 1),
+                    each not IsWorkday(_),
+                    each Date.AddDays(_, 1)
+                )
+            in
+                if List.IsEmpty(candidates) 
+                then Date.AddDays(d, 1)
+                else Date.AddDays(List.Last(candidates), 1),
+
+        NextMonday = (d as date) as date =>
+            let
+                candidates = List.Generate(
+                    () => Date.AddDays(d, 1),
+                    each Date.DayOfWeek(_, Day.Monday) <> 0 or not IsWorkday(_),
+                    each Date.AddDays(_, 1)
+                )
+            in
+                if List.IsEmpty(candidates) 
+                then Date.AddDays(d, 1)
+                else Date.AddDays(List.Last(candidates), 1),
+
+        LastWorkdayOfMonth = (ev as number, honap as number) as date =>
+            let
+                utolso = Date.EndOfMonth(#date(ev, honap, 1)),
+                candidates = List.Generate(
+                    () => utolso,
+                    each not IsWorkday(_),
+                    each Date.AddDays(_, -1)
+                )
+            in
+                if List.IsEmpty(candidates) 
+                then utolso
+                else Date.AddDays(List.Last(candidates), -1),
+
+        // ── Beérkezés normalizálása ───────────────────────────────────
+        bDatum = DateTime.Date(beerkezett),
+        bIdo   = DateTime.Time(beerkezett),
+
+        effDatum = if IsWorkday(bDatum) then bDatum else NextWorkday(bDatum),
+        effIdo   = if IsWorkday(bDatum) then bIdo   else #time(0, 0, 0),
+        effDow   = Date.DayOfWeek(effDatum, Day.Monday),
+
+        // ── Szabály kikeresése ────────────────────────────────────────
+        FindRule = (d as date, ido as time) as record =>
+            let
+                dow = Date.DayOfWeek(d, Day.Monday),
+                filtered = Table.SelectRows(szabalyok, each
+                    Text.Upper([Kategoria]) = Text.Upper(kategoria) and
+                    Text.Upper([Tipus])     = Text.Upper(tipus) and
+                    [Nap_tol] <= dow and dow <= [Nap_ig] and
+                    [Ido_tol] <= ido and ido <= [Ido_ig]
+                )
+            in
+                if Table.RowCount(filtered) > 0 
+                then Table.First(filtered)
+                else [Hatarido_Tipus = "ISMERETLEN", Hatarido_Ido = null],
+
+        // ── Határidő kiszámítása egy szabály alapján ──────────────────
+        CalcHatarido = (d as date, ido as time) as datetime =>
+            let
+                rule = FindRule(d, ido),
+                tipus2 = rule[Hatarido_Tipus],
+                hIdo   = rule[Hatarido_Ido],
+
+                result = 
+                    if tipus2 = "AZNAP" then
+                        DateTime.From(d) + #duration(0, Time.Hour(hIdo), Time.Minute(hIdo), 0)
+
+                    else if tipus2 = "KOVETKEZO" then
+                        // Következő munkanap → rekurzív helyett újra kikeressük
+                        let 
+                            k = NextWorkday(d),
+                            kRule = FindRule(k, #time(0,0,0)),
+                            kTipus = kRule[Hatarido_Tipus],
+                            kIdo = kRule[Hatarido_Ido]
+                        in
+                            DateTime.From(k) + #duration(0, Time.Hour(kIdo), Time.Minute(kIdo), 0)
+
+                    else if tipus2 = "KOVETKEZO_NAP" then
+                        let k = NextWorkday(d)
+                        in DateTime.From(k) + #duration(0, Time.Hour(hIdo), Time.Minute(hIdo), 0)
+
+                    else if tipus2 = "HETFO" then
+                        let k = NextMonday(d)
+                        in DateTime.From(k) + #duration(0, Time.Hour(hIdo), Time.Minute(hIdo), 0)
+
+                    else if tipus2 = "HONAP_VEGE" then
+                        let
+                            nap   = Date.Day(d),
+                            refEv = if nap <= 20 then Date.Year(d)
+                                    else if Date.Month(d) = 12 then Date.Year(d) + 1
+                                    else Date.Year(d),
+                            refHo = if nap <= 20 then Date.Month(d)
+                                    else if Date.Month(d) = 12 then 1
+                                    else Date.Month(d) + 1,
+                            utolso = LastWorkdayOfMonth(refEv, refHo)
+                        in
+                            DateTime.From(utolso) + #duration(0, Time.Hour(hIdo), Time.Minute(hIdo), 0)
+
+                    else error "Ismeretlen szabály típus: " & tipus2
+            in
+                result
+
+    in
+        CalcHatarido(effDatum, effIdo)
+in
+    fn
